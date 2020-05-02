@@ -15,14 +15,34 @@
   height: 50px; 
 }
 
-.localMedia { 
-  width: 200px;
-  height: 200px;
-  background-color: #272726;
-  background-repeat: no-repeat;
+.Media { 
+  height: 800px;
+  display: flex;
+  flex-wrap: wrap;
 }
 
-.localMedia video { 
-  width: 100%;
-  height: 100%;
+.Media div { 
+  flex: 1 1 0;
 }
+
+.Media audio { 
+  flex: 0;  
+}
+
+.Media video { 
+  width: 100%; 
+  object-fit: cover;
+}
+
+
+/* 
+.Container {
+  height: 300px; 
+  border: 1px solid black;
+  display: flex;
+}
+
+.Container div { 
+  border: 1px solid red; 
+  flex: 1 1 0; 
+} */

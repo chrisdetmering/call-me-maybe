@@ -58,16 +58,18 @@ class VideoComponent extends React.Component {
   }
 
   localMedia = () => {
-    let mediaContainer = document.getElementById('localMedia')
+    let mediaContainer = document.getElementById('media')
     console.log(mediaContainer)
     let pub = Array.from(this.state.room.localParticipant.tracks.values())
     pub.forEach(p => { 
-      mediaContainer.appendChild(p.track.attach())
+      let cont = document.createElement('div')
+      cont.appendChild(p.track.attach())
+      mediaContainer.appendChild(cont)
     })
   }
 
   remoteMedia = () => {
-    let mediaContainer = document.getElementById('remoteMedia')
+    let mediaContainer = document.getElementById('media')
     console.log(mediaContainer)
    this.state.room.participants.forEach(part =>{ 
      part.tracks.forEach( p =>{ 
@@ -79,13 +81,22 @@ class VideoComponent extends React.Component {
     })
   }
 
+  attach = () => { 
+    const item = document.createElement('div')
+    document.getElementById('flexContainer').appendChild(item)
+  }
+
+
   render() { 
 
     return (
       <Aux>
+        {/* <div className={classes.Container}
+        id='flexContainer'></div>
+        <button onClick={this.attach}>attach flex item</button> */}
+
         <div>
-          <div id='localMedia' className={classes.localMedia}></div>
-          <div id='remoteMedia'></div>
+          <div className={classes.Media} id='media'></div>
         </div>
 
         <nav className={classes.Control}>
