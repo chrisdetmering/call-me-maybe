@@ -32,7 +32,6 @@ class VideoComponent extends React.Component {
   createRoom = () => { 
     axios.post('/room', {} )
     .then(room => {
-      console.log(room)
       this.setState({ room })
     }).catch( error => { 
       console.log(error.message)
@@ -57,33 +56,31 @@ class VideoComponent extends React.Component {
     this.setState({ roomName })
   }
 
-  localMedia = () => {
+  attachMedia = (p) => { 
     let mediaContainer = document.getElementById('media')
-    console.log(mediaContainer)
-    let pub = Array.from(this.state.room.localParticipant.tracks.values())
-    pub.forEach(p => { 
-      let cont = document.createElement('div')
+    let cont = document.createElement('div')
+    if (p.track.kind === 'audio') {
+      mediaContainer.appendChild(p.track.attach())
+    } else {
       cont.appendChild(p.track.attach())
       mediaContainer.appendChild(cont)
+    }
+  }
+
+
+  localMedia = () => {
+    let pub = Array.from(this.state.room.localParticipant.tracks.values())
+    pub.forEach(p => { 
+      this.attachMedia(p)
     })
   }
 
   remoteMedia = () => {
-    let mediaContainer = document.getElementById('media')
-    console.log(mediaContainer)
    this.state.room.participants.forEach(part =>{ 
      part.tracks.forEach( p =>{ 
-       if (p.isSubscribed) { 
-         mediaContainer.appendChild(p.track.attach())
-       }
+       if (p.isSubscribed) { this.attachMedia(p)}
      })
-    
     })
-  }
-
-  attach = () => { 
-    const item = document.createElement('div')
-    document.getElementById('flexContainer').appendChild(item)
   }
 
 
