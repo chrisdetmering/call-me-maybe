@@ -8,3 +8,10 @@
   border-radius: 5px;
   background-color: white;
 }
+
+.Control { 
+  border: 1px solid black; 
+  display: flex; 
+  justify-content: center;
+  height: 50px; 
+}
