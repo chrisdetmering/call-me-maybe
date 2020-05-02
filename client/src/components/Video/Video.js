@@ -1,8 +1,8 @@
-import React, { createRef } from 'react';
+import React from 'react';
 import axios from 'axios';
 import classes from './Video.module.css';
 import Aux from '../../hoc/Aux/Aux';
-import {connect } from 'twilio-video';
+import { connect } from 'twilio-video';
 
 class VideoComponent extends React.Component {
   constructor(props) { 
@@ -10,59 +10,44 @@ class VideoComponent extends React.Component {
     this.state = {
       identity: null,
       token: null,
-      roomName: '',   
-      roomNameErr: false,
-      localMediaAvailable: true, 
-      hasJoinedRoom: false
-    };
-    this.localMedia = createRef();
-    this.remoteMedia = createRef();
+      roomName: '',
+      room: null, 
+      localParticipants: 0, 
+      remoteParticipants: 0 
+    };   
   }
-  
-  
-  componentDidMount() {
-    axios.get('/token').then(results => {
-      const { identity, token } = results.data;
-      this.setState({ identity, token });
 
-    }).catch(error => { 
+  getToken = () => {
+    axios.get('/token').then(results => {
+      const { identity, token, roomName } = results.data;
+      this.setState({ identity, token, roomName });
+
+    }).catch(error => {
       console.log(error)
     });
   }
-
-
-  joinRoom = () => { 
-    let connectOptions = {
-      name: this.state.roomName
-    };
-
-    connect(this.state.token, connectOptions).then(this.roomJoined, error => {
-      alert(error.message);
-    });
-  }
-
-
-  joinLocalPerticipant = (room) => { 
-    let publications = Array.from(room.localParticipant.tracks.values())
-    let mediaContainer = this.localMedia.current
-
-    publications.forEach(publication => {
-      mediaContainer.appendChild(publication.track.attach())
+  
+  createRoom = () => { 
+    axios.post('/room', {} )
+    .then(room => {
+      console.log(room)
+      this.setState({ room })
+    }).catch( error => { 
+      console.log(error.message)
     })
   }
 
-
-  roomJoined = (room) => {
-    this.joinLocalPerticipant(room)
-    console.log(room.participants)
-    room.participants.forEach(participant => {
-      console.log(participant.identity);
+  joinRoom = () => { 
+    connect(this.state.token, {}).then(room => {
+      console.log(`joined a Room: ${room}`);
+      this.setState({room: room})
+      room.on('participantConnected', participant => {
+        console.log(`Participant connected: ${participant}`);
+      });
+    }, error => {
+      console.error(`Unable to connect to Room: ${error.message}`);
     });
 
-  }
-
-  leaveRoom = () => {
-    
   }
 
   handleRoomNameChange = (event) => { 
@@ -70,25 +55,62 @@ class VideoComponent extends React.Component {
     this.setState({ roomName })
   }
 
+  localMedia = () => {
+    let mediaContainer = document.getElementById('localMedia')
+    console.log(mediaContainer)
+    let pub = Array.from(this.state.room.localParticipant.tracks.values())
+    pub.forEach(p => { 
+      mediaContainer.appendChild(p.track.attach())
+    })
+  }
+
+  remoteMedia = () => {
+    let mediaContainer = document.getElementById('remoteMedia')
+    console.log(mediaContainer)
+   this.state.room.participants.forEach(part =>{ 
+     part.tracks.forEach( p =>{ 
+       if (p.isSubscribed) { 
+         mediaContainer.appendChild(p.track.attach())
+       }
+     })
+    
+    })
+    // pub.forEach(p => {
+    //   mediaContainer.appendChild(p.track.attach())
+    // })
+  }
 
   render() { 
 
-    let showLocalTrack = this.state.localMediaAvailable ? (
-      <div><div ref={this.localMedia}  /> </div>) : null; 
-
-    let joinOrLeaveRoomButton = this.state.hasJoinedRoom ? (
-      <button onClick={this.leaveRoom}>Leave</button>) : (
-      <button onClick={this.joinRoom}>Join</button>);
-
     return (
       <Aux>
-        {showLocalTrack}
-        {joinOrLeaveRoomButton}
-        <input 
+        {/* <input 
+          className={classes.Input} 
+          onChange={this.handleRoomNameChange}/> */}
+          <br/>
+        <button 
+          onClick={this.createRoom}
+          className={classes.Button}>Create Room</button>
+          <hr/>
+        <button
+          onClick={this.getToken}
+          className={classes.Button}>Get Token</button>
+        <hr />
+        <input
           className={classes.Input}
-          onChange={this.handleRoomNameChange}
-          value={this.state.roomName}/>
-        <div className="" ref={this.remoteMedia} id="remote-media" />
+          onChange={this.handleRoomNameChange}/>
+          <br />
+        <button 
+          onClick={this.joinRoom}
+          className={classes.Button}>Join Room</button>
+        
+        <button onClick={this.localMedia}>LocalMedia</button>
+        <button onClick={this.remoteMedia}>remoteMedia</button>
+        
+
+        <div id='localMedia'></div>
+        <div id='remoteMedia'></div>
+
       </Aux>
     );
   }  

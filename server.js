@@ -1,7 +1,5 @@
-var AccessToken = require('twilio').jwt.AccessToken;
 const express = require('express');
 const bodyParser = require('body-parser');
-const path = require('path');
 var faker = require('faker');
 
 const app = express();
@@ -10,47 +8,51 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
-var AccessToken = require('twilio').jwt.AccessToken;
-var VideoGrant = AccessToken.VideoGrant;
+//Room Joining
+createAccessToken = () => { 
+  let AccessToken = require('twilio').jwt.AccessToken;
+  let VideoGrant = AccessToken.VideoGrant;
+  let accessToken = new AccessToken(
+    'ACf0403818be2b4a8868388f7419a3c3d4',
+    'SKd1a4803b36c14c17f63a15fa4846a40f',
+    'h8t2m8hhl0UHxEwi2nynsxEkAwmfRroR'
+  );
 
-// Substitute your Twilio AccountSid and ApiKey details
+  let identity = faker.name.findName()
+  accessToken.identity = identity;
 
-// Create an Access Token
-var accessToken = new AccessToken(
-  'ACf0403818be2b4a8868388f7419a3c3d4',
-  'SKd1a4803b36c14c17f63a15fa4846a40f',
-  'h8t2m8hhl0UHxEwi2nynsxEkAwmfRroR'
-);
-let identity = faker.name.findName()
-// Set the Identity of this token
-accessToken.identity = identity;
+  let grant = new VideoGrant({ room: 'Class' });
 
-// Grant access to Video
-var grant = new VideoGrant();
-accessToken.addGrant(grant);
+  accessToken.addGrant(grant);
 
-// Serialize the token as a JWT
-var jwt = accessToken.toJwt();
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+  return accessToken.toJwt();
+}
 
 app.get('/token', (req, res) => {
-  res.send({ 
-    identity: identity,
-    token: jwt });
+  let token = createAccessToken();
+  
+  res.send({ token: token });
 });
 
 
-if (process.env.NODE_ENV === 'production') {
-  // Serve any static files
-  app.use(express.static(path.join(__dirname, 'client/build')));
+//Room Creation
+const accountSid = 'ACf0403818be2b4a8868388f7419a3c3d4';
+const authToken = '0ae96aa18b53fce44a40ba78a5f813b6'
+const client = require('twilio')(accountSid, authToken);
 
-  // Handle React routing, return all requests to React app
-  app.get('*', function (req, res) {
-    res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
-  });
-}
+app.post('/room', (req, res) =>{
+  client.video.rooms
+    .create({
+      recordParticipantsOnConnect: false,
+      statusCallback: 'http://example.org',
+      type: 'group',
+      uniqueName: 'Class'
+    })
+    .then(room => { 
+      res.send({ room: room })
+    })
+
+})
 
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
