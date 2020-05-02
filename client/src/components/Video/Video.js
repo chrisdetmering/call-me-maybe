@@ -15,11 +15,12 @@ class VideoComponent extends React.Component {
       roomName: '',
       room: null, 
       localParticipants: 0, 
-      remoteParticipants: 0 
+      remoteParticipants: 0, 
+      videosOnScreen: 0
     };   
   }
 
-  getToken = () => {
+  componentDidMount () {
     axios.get('/token').then(results => {
       const { identity, token, roomName } = results.data;
       this.setState({ identity, token, roomName });
@@ -59,39 +60,47 @@ class VideoComponent extends React.Component {
   attachMedia = (p) => { 
     let mediaContainer = document.getElementById('media')
     let cont = document.createElement('div')
+   
     if (p.track.kind === 'audio') {
       mediaContainer.appendChild(p.track.attach())
-    } else {
+    } else { 
       cont.appendChild(p.track.attach())
       mediaContainer.appendChild(cont)
     }
+    
+    this.addToVideoCount()
   }
 
+  addToVideoCount = () => {
+    let videosOnScreen = this.state.videosOnScreen + 1;
+    this.setState({ videosOnScreen })
+  }
 
   localMedia = () => {
-    let pub = Array.from(this.state.room.localParticipant.tracks.values())
-    pub.forEach(p => { 
-      this.attachMedia(p)
-    })
+    if (this.checkNumVideos()) {
+      let pub = Array.from(this.state.room.localParticipant.tracks.values())
+      pub.forEach(p => { 
+        this.attachMedia(p)
+      })
+    }
   }
+
+  checkNumVideos = () => (this.state.videosOnScreen < 2)
 
   remoteMedia = () => {
-   this.state.room.participants.forEach(part =>{ 
-     part.tracks.forEach( p =>{ 
-       if (p.isSubscribed) { this.attachMedia(p)}
-     })
-    })
+    if (this.checkNumVideos()) {
+      this.state.room.participants.forEach(part =>{ 
+        part.tracks.forEach( p =>{ 
+          if (p.isSubscribed) { this.attachMedia(p)}
+        })
+      })
+    }
   }
-
 
   render() { 
 
     return (
       <Aux>
-        {/* <div className={classes.Container}
-        id='flexContainer'></div>
-        <button onClick={this.attach}>attach flex item</button> */}
-
         <div>
           <div className={classes.Media} id='media'></div>
         </div>
@@ -99,12 +108,10 @@ class VideoComponent extends React.Component {
         <nav className={classes.Control}>
           <Button 
             click={this.createRoom}>Create Room</Button>
-          <Button
-            click={this.getToken}>Get Token</Button>
           <Button 
             click={this.joinRoom}>Join Room</Button>
           <Button 
-            click={this.localMedia}>LocalMedia</Button>
+            click={this.localMedia}>Show Video</Button>
           <Button 
             click={this.remoteMedia}>remoteMedia</Button>
         </nav>
