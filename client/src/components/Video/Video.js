@@ -4,6 +4,8 @@ import classes from './Video.module.css';
 import Aux from '../../hoc/Aux/Aux';
 import { connect } from 'twilio-video';
 
+import Button from '../Button /Button';
+
 class VideoComponent extends React.Component {
   constructor(props) { 
     super(props)
@@ -80,27 +82,24 @@ class VideoComponent extends React.Component {
   render() { 
 
     return (
-      <Aux class={classes.Control}>
-        <button 
-          onClick={this.createRoom}
-          className={classes.Button}>Create Room</button>
-        <button
-          onClick={this.getToken}
-          className={classes.Button}>Get Token</button>
-        <button 
-          onClick={this.joinRoom}
-          className={classes.Button}>Join Room</button>
-        <button 
-          onClick={this.localMedia}
-          className={classes.Button}>LocalMedia</button>
-        <button 
-          onClick={this.remoteMedia}
-          className={classes.Button}>remoteMedia</button>
-        
-          
-          <div id='localMedia'></div>
+      <Aux>
+        <div>
+          <div id='localMedia' className={classes.localMedia}></div>
           <div id='remoteMedia'></div>
+        </div>
 
+        <nav className={classes.Control}>
+          <Button 
+            click={this.createRoom}>Create Room</Button>
+          <Button
+            click={this.getToken}>Get Token</Button>
+          <Button 
+            click={this.joinRoom}>Join Room</Button>
+          <Button 
+            click={this.localMedia}>LocalMedia</Button>
+          <Button 
+            click={this.remoteMedia}>remoteMedia</Button>
+        </nav>
       </Aux>
     );
   }  
