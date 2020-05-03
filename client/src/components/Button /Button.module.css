@@ -2,6 +2,8 @@
   border: 1px solid transparent; 
   background-color: transparent; 
   color: white;
+  height: 50px; 
+  width: 100px; 
 }
 
 .Button:hover { 

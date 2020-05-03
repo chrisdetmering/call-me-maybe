@@ -13,6 +13,8 @@ class VideoComponent extends React.Component {
       identity: null,
       token: null,
       roomName: '',
+      newRoomName: '',
+      roomToJoin: '',
       room: null, 
       localParticipants: 0, 
       remoteParticipants: 0, 
@@ -20,27 +22,33 @@ class VideoComponent extends React.Component {
     };   
   }
 
-  componentDidMount () {
-    axios.get('/token').then(results => {
-      const { identity, token, roomName } = results.data;
-      this.setState({ identity, token, roomName });
-
-    }).catch(error => {
-      console.log(error)
+  getToken = () => {
+    axios.get('/token', {params: {room: this.state.roomToJoin } })
+    .then(results => {
+      const { token } = results.data;
+      this.setState({ token });
+    })
+    .then(() => this.joinRoom())
+    .catch(error => {
+      alert(`You had the following error: ${error}`)
     });
   }
   
   createRoom = () => { 
-    axios.post('/room', {} )
-    .then(room => {
-      this.setState({ room })
+    axios.post('/room', {roomName: this.state.newRoomName } )
+    .then(response => {
+      this.setState({ 
+        room: response, 
+        roomName: response.data.room.uniqueName 
+      })
     }).catch( error => { 
+      alert(error)
       console.log(error.message)
     })
   }
 
   joinRoom = () => { 
-    connect(this.state.token, {}).then(room => {
+    connect(this.state.token, {name: this.state.roomToJoin }).then(room => {
       console.log(`joined a Room: ${room}`);
       this.setState({room: room})
       room.on('participantConnected', participant => {
@@ -52,9 +60,15 @@ class VideoComponent extends React.Component {
 
   }
 
-  handleRoomNameChange = (event) => { 
-    let roomName = event.target.value;
-    this.setState({ roomName })
+
+  handleNewRoomNameChange = event => {
+    let newRoomName = event.target.value;
+    this.setState({ newRoomName })
+  }
+
+  handleRoomToJoin = event => { 
+    let roomToJoin = event.target.value;
+    this.setState({ roomToJoin })
   }
 
   attachMedia = (p) => { 
@@ -108,8 +122,14 @@ class VideoComponent extends React.Component {
         <nav className={classes.Control}>
           <Button 
             click={this.createRoom}>Create Room</Button>
+          <input 
+            className={classes.Input}
+            onChange={this.handleNewRoomNameChange} />
           <Button 
-            click={this.joinRoom}>Join Room</Button>
+            click={this.getToken}>Join Room</Button>
+          <input 
+            className={classes.Input}
+            onChange={this.handleRoomToJoin}/>
           <Button 
             click={this.localMedia}>Show Video</Button>
           <Button 
