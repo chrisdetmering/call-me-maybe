@@ -23,7 +23,8 @@ class VideoComponent extends React.Component {
       }, 
       remoteMedia: { 
         removePublication: null
-      }
+      }, 
+      roomJoinedSuccessfully: null
     };   
   }
 
@@ -60,6 +61,7 @@ class VideoComponent extends React.Component {
 
   notifyUserThatRoomWasJoined = () => {
     alert(`successfully joined ${this.state.roomToJoin}`);
+    this.setState({ roomJoinedSuccessfully: true })
   }
 
   notifyLocalUserWhenParticipantEntersRoom = (room) => { 
@@ -146,17 +148,20 @@ class VideoComponent extends React.Component {
     })
   }
 
-  getRemoteParticipants = () => ( 
-    this.state.room.participants
-  )
 
-  remoteMedia = () => {
-      this.getRemoteParticipants().forEach(participant =>{ 
+  addRemoteMedia = () => {
+   this.state.room.participants.forEach(participant =>{ 
       participant.tracks.forEach( p =>{ 
-        if (p.isSubscribed) { this.attachMedia(p)}
+        if (p.isSubscribed) { this.attachRemoteParticipantMedia(p)}
       })
     })
   }
+
+  attachRemoteParticipantMedia = (p) => { 
+    let remoteMediaContainer = document.getElementById('remoteMedia')
+    remoteMediaContainer.appendChild(p.track.attach())
+  }
+
 
   removeLocalVideo = () => { 
     let localVideoContainer = document.getElementById(`localVideo`)
@@ -182,6 +187,24 @@ class VideoComponent extends React.Component {
     })
   }
 
+  leaveRoom = () => { 
+    let room = this.state.room
+    room.disconnect()
+
+    room.on('disconnected', room => {
+      // Detach the local media elements
+      console.log('disconnected')
+      room.localParticipant.tracks.forEach(publication => {
+        const attachedElements = publication.track.detach();
+        attachedElements.forEach(element => element.remove());
+      });
+    });
+
+    alert('you left the room')
+    this.removeLocalVideo()
+    this.removeLocalAudio()
+  }
+
 
   render() { 
       let toggleLocalVideo = this.state.localMedia.displayLocalVideo 
@@ -192,28 +215,46 @@ class VideoComponent extends React.Component {
         ? <Button click={this.removeLocalAudio}>Mute</Button>
         : <Button click={this.addLocalParticipantAudio}>Unmute</Button>
 
-    return (
-      <Aux>
-        <div className={classes.localMedia} id='localVideo'></div>
-        <div id='localAudio'></div>
 
-        <nav className={classes.Control}>
-          <div>
-            <Button 
+      let showControls = this.state.roomJoinedSuccessfully 
+        ? <div style={{display: 'flex'}}>
+          {toggleLocalVideo}
+          {toggleLocalAudio}
+
+          <Button
+            click={this.addRemoteMedia}>Remote Media</Button>
+
+          <Button
+            click={this.leaveRoom}>Leave Call</Button>
+        </div>
+        : <div style={{display: 'flex'}}>
+            <div>
+            <Button
               click={this.createRoom}>Create Room</Button>
-            <input 
+            <input
               className={classes.Input}
               onChange={this.handleNewRoomNameChange} />
-          </div>
-          <div>
-            <Button 
+            </div>
+            <div>
+            <Button
               click={this.getToken}>Join Room</Button>
-            <input 
+            <input
               className={classes.Input}
-              onChange={this.handleRoomToJoin}/>
+              onChange={this.handleRoomToJoin} />
+            </div>
           </div>
-            {toggleLocalVideo}
-            {toggleLocalAudio}
+
+
+    return (
+      <Aux>
+        <div className={classes.mediaContainer}>
+          <div className={classes.localMedia} id='localVideo'></div>
+          <div id='localAudio'></div>
+          <div className={classes.remoteMedia} id='remoteMedia'></div>
+        </div>
+
+        <nav className={classes.Control}>
+          {showControls}
         </nav>
       </Aux>
     );

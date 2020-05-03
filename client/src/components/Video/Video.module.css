@@ -1,7 +1,32 @@
-.Input { 
-  border: 1px solid black;  
-  border-radius: 5px;
+.mediaContainer { 
+  border: 2px solid black; 
+  display: flex
 }
+
+.localMedia { 
+  height: 800px;
+  width: 50%;
+  border: 1px solid blue;
+}
+
+
+.localMedia video { 
+  width: 100%;
+  height: 100%; 
+}
+
+.remoteMedia { 
+  height: 800px;
+  width: 50%;
+  border: 1px solid pink;
+
+}
+
+.remoteMedia video { 
+  width: 100%;
+  height: 100%; 
+}
+
 
 .Control { 
   position: fixed;
@@ -15,18 +40,8 @@
   height: 80px; 
 }
 
-.localMedia { 
-  height: 800px;
-  width: 50%;
-}
-
-
-.localMedia video { 
-  width: 100%;
-  height: 100%; 
-}
-
 .Input { 
   height: 15px; 
-  width: 100px; 
+  width: 100px;
+  border: 1px solid black;   
 }
