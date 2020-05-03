@@ -4,6 +4,7 @@
   color: white;
   height: 50px; 
   width: 100px; 
+  margin: 0 10px; 
 }
 
 .Button:hover { 
