@@ -1,7 +1,7 @@
-##call-me-maybe
+**call-me-maybe**
 [See it live!](https://call-me-maybe-chat-app.herokuapp.com/)
 
-##Technologies
+**Technologies**
 call-me-maybe is an application built with:
 
 Redux, Express, Node.js and Twilio video communications API 
