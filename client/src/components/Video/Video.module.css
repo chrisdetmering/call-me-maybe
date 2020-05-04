@@ -6,9 +6,8 @@
 .localMedia { 
   height: 800px;
   width: 50%;
-  border: 1px solid blue;
+  border: 1px solid black;
 }
-
 
 .localMedia video { 
   width: 100%;
@@ -17,9 +16,8 @@
 
 .remoteMedia { 
   height: 800px;
-  width: 50%;
-  border: 1px solid pink;
-
+  width: 50%; 
+  border: 1px solid black; 
 }
 
 .remoteMedia video { 

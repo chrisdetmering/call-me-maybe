@@ -21,10 +21,10 @@ class VideoComponent extends React.Component {
         addLocalAudio: false
       }, 
       remoteMedia: { 
-        available: false, 
         remotePublication: null
       }, 
-      roomJoinedSuccessfully: null
+      roomJoinedSuccessfully: null, 
+      remoteMediaAvalable: false
     };   
   }
 
@@ -60,14 +60,14 @@ class VideoComponent extends React.Component {
   }
 
   notifyUserThatRoomWasJoined = () => {
-    alert(`successfully joined ${this.state.roomToJoin}`);
+    alert(`successfully joined ${this.state.newRoomName}`);
     this.setState({ roomJoinedSuccessfully: true })
   }
 
   notifyLocalUserWhenParticipantEntersRoom = (room) => { 
     room.on('participantConnected', participant => {
       console.log(`${participant} connected`);
-      
+      this.setState({ remoteMediaAvalable: true })
     });
   }
 
@@ -80,7 +80,9 @@ class VideoComponent extends React.Component {
       this.addLocalMediaToState()
     }, error => {
       console.error(error.message);
-    });
+      alert('not able to join room.. Check your spelling!')
+      this.setState({ newRoomName: null })
+    })
 
   }
 
@@ -116,7 +118,6 @@ class VideoComponent extends React.Component {
     })
   }
 
-  //Turning a Map into an array using the Array from method
   getPublications = () => (
     Array.from(this.state.room.localParticipant.tracks.values())
   )
@@ -145,11 +146,12 @@ class VideoComponent extends React.Component {
     })
   }
 
-
   addRemoteMedia = () => {
    this.state.room.participants.forEach(participant =>{ 
       participant.tracks.forEach( p =>{ 
-        if (p.isSubscribed) { this.attachRemoteParticipantMedia(p)}
+        if (p.isSubscribed) { 
+          this.attachRemoteParticipantMedia(p)
+        }
       })
     })
   }
@@ -158,7 +160,6 @@ class VideoComponent extends React.Component {
     let remoteMediaContainer = document.getElementById('remoteMedia')
     remoteMediaContainer.appendChild(p.track.attach())
   }
-
 
   removeLocalVideo = () => { 
     let localVideoContainer = document.getElementById(`localVideo`)
@@ -184,10 +185,39 @@ class VideoComponent extends React.Component {
     })
   }
 
+  removeRemoteMedia = () => {
+    let remoteMediaContainer = document.getElementById(`remoteMedia`)
+
+    if (remoteMediaContainer.childNodes.length > 0 ) { 
+      remoteMediaContainer
+      .removeChild(remoteMediaContainer.childNodes[0])
+    }
+  }
+
+
+
   leaveRoom = () => { 
     let room = this.state.room
     room.disconnect()
+    this.disconnectMediaTracksFromRoom(room)
+    alert('you left the room')
+    this.checkAndRemoveLocalMediaFromUI()
+    this.removeRemoteMedia()
+    this.setState({ 
+      roomJoinedSuccessfully: false, 
+      token: null,
+      roomName: null,
+      newRoomName: null,
+      room: null
+     })
+  }
 
+  checkAndRemoveLocalMediaFromUI = () => { 
+    if (this.state.localMedia.displayLocalVideo) { this.removeLocalVideo() }
+    if (this.state.localMedia.addLocalAudio) { this.removeLocalAudio() }
+  }
+
+  disconnectMediaTracksFromRoom = (room) => { 
     room.on('disconnected', room => {
       // Detach the local media elements
       console.log('disconnected')
@@ -196,12 +226,7 @@ class VideoComponent extends React.Component {
         attachedElements.forEach(element => element.remove());
       });
     });
-
-    alert('you left the room')
-    this.removeLocalVideo()
-    this.removeLocalAudio()
   }
-
 
   render() { 
       let toggleLocalVideo = this.state.localMedia.displayLocalVideo 
@@ -238,18 +263,18 @@ class VideoComponent extends React.Component {
               change={this.handleNewRoomNameChange}
               value={this.state.newRoomName}>Join Room</Button>
           </div>
-
+ 
 
     return (
       <Aux>
+        <h1 style={{textAlign: 'center'}}>Room Name: {this.state.newRoomName}</h1>
         <div className={classes.mediaContainer}>
           <div className={classes.localMedia} id='localVideo'></div>
-          <div id='localAudio'></div>
-
+            <div id='localAudio'></div>
           <div className={classes.remoteMedia} id='remoteMedia'></div>
+    
 
         </div>
-
         <nav className={classes.Control}>
           {showControls}
         </nav>
