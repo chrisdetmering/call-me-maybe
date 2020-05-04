@@ -13,7 +13,6 @@ class VideoComponent extends React.Component {
       token: null,
       roomName: null,
       newRoomName: null,
-      roomToJoin: null,
       room: null, 
       localMedia: { 
         localVideoPublication: null, 
@@ -22,14 +21,15 @@ class VideoComponent extends React.Component {
         addLocalAudio: false
       }, 
       remoteMedia: { 
-        removePublication: null
+        available: false, 
+        remotePublication: null
       }, 
       roomJoinedSuccessfully: null
     };   
   }
 
   getToken = () => {
-    axios.get('/token', {params: {room: this.state.roomToJoin } })
+    axios.get('/token', {params: {room: this.state.newRoomName } })
     .then(results => {
       const { token } = results.data;
       this.setState({ token });
@@ -67,12 +67,13 @@ class VideoComponent extends React.Component {
   notifyLocalUserWhenParticipantEntersRoom = (room) => { 
     room.on('participantConnected', participant => {
       console.log(`${participant} connected`);
+      
     });
   }
 
 
   joinRoom = () => { 
-    connect(this.state.token, {name: this.state.roomToJoin }).then(room => {
+    connect(this.state.token, {name: this.state.newRoomName }).then(room => {
       this.notifyUserThatRoomWasJoined()
       this.setState({room: room})
       this.notifyLocalUserWhenParticipantEntersRoom(room)
@@ -89,10 +90,6 @@ class VideoComponent extends React.Component {
     this.setState({ newRoomName })
   }
 
-  handleRoomToJoin = event => { 
-    let roomToJoin = event.target.value;
-    this.setState({ roomToJoin })
-  }
 
   displayLocalParticiantVideo = () => { 
     let localPublication = this.state.localMedia.localVideoPublication;
@@ -228,20 +225,18 @@ class VideoComponent extends React.Component {
             click={this.leaveRoom}>Leave Call</Button>
         </div>
         : <div style={{display: 'flex'}}>
-            <div>
+          
             <Button
-              click={this.createRoom}>Create Room</Button>
-            <input
-              className={classes.Input}
-              onChange={this.handleNewRoomNameChange} />
-            </div>
-            <div>
+              click={this.createRoom}
+              input={true}
+              change={this.handleNewRoomNameChange}
+              value={this.state.newRoomName}>Create Room</Button>
+         
             <Button
-              click={this.getToken}>Join Room</Button>
-            <input
-              className={classes.Input}
-              onChange={this.handleRoomToJoin} />
-            </div>
+              click={this.getToken}
+              input={true}
+              change={this.handleNewRoomNameChange}
+              value={this.state.newRoomName}>Join Room</Button>
           </div>
 
 
@@ -250,7 +245,9 @@ class VideoComponent extends React.Component {
         <div className={classes.mediaContainer}>
           <div className={classes.localMedia} id='localVideo'></div>
           <div id='localAudio'></div>
+
           <div className={classes.remoteMedia} id='remoteMedia'></div>
+
         </div>
 
         <nav className={classes.Control}>
