@@ -1,4 +1,4 @@
-##call-me-maybe##
+**call-me-maybe**
 [See it live!](https://call-me-maybe-chat-app.herokuapp.com/)
 
 **Technologies**
