@@ -1,19 +1,18 @@
-call-me-maybe
+##call-me-maybe
 [See it live!](https://call-me-maybe-chat-app.herokuapp.com/)
 
-Technologies
-Plaidchat is a full-stack application built with:
+##Technologies
+call-me-maybe is an application built with:
 
-Ruby on Rails
-React
-Redux
-the WebSocket protocol (implemented with ActionCable)
-Variations of BEM and SMACCS styling conventions
-This project was a learning exercise with a goal of following the functionality and design of an existing online application (slack) in order to build a full-stack app which meets predetermined feature and style specifications.
+Redux, Express, Node.js and Twilio video communications API 
 
-Features
-Live Chat
-Users can chat live with any internet-connected user around the world. A demonstration showing the live chat functionality
+This project was a developer to learn about the twilio API and how to...
+
+##Features
+User Can Create New Roomes using the Twilio API 
+
+
+
 
 Magic Link
 Users can generate links to invite peers who are or aren't already registered on the site to easily join their chat. A demonstration showing the generation of an invite link
