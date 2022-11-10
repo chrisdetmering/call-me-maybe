@@ -1,6 +1,9 @@
 {
   "name": "call-me",
   "version": "1.0.0",
+  "engines": {
+    "node": "v12.18.3"
+  },
   "scripts": {
     "client": "cd client && yarn start",
     "server": "nodemon server.js",
