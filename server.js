@@ -1,4 +1,3 @@
-require('dotenv').config()
 const createAccessToken = require('./util/util')
 const express = require('express');
 const bodyParser = require('body-parser');
