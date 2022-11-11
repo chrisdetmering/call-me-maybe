@@ -1,5 +1,4 @@
 let faker = require('faker');
-require('dotenv').config();
 let AccessToken = require('twilio').jwt.AccessToken;
 
 createAccessToken = (room) => {
